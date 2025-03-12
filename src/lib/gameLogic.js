@@ -1,5 +1,5 @@
 export const gameLogic = {
-    initialBoard: () => [
+    initialBoardWhite: () => [
       [
         { type: 'rook', color: 'black', image: '/pieces/br.png' },
         { type: 'knight', color: 'black', image: '/pieces/bn.png' },
@@ -45,34 +45,58 @@ export const gameLogic = {
         { type: 'rook', color: 'white', image: '/pieces/wr.png' },
       ],
     ],
-  
-    drawBoard: (ctx, board) => {
-      const squareSize = 60;
-      if (!ctx) {
-        return;
-      }
-      for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-          ctx.fillStyle = (row + col) % 2 === 0 ? '#f0d9b5' : '#b58863';
-          ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
-  
-          const piece = board[row][col];
-          if (piece) {
-            gameLogic.drawPiece(ctx, piece, col * squareSize, row * squareSize);
-          }
-        }
-      }
-    },
-  
-    drawPiece: (ctx, piece, x, y) => {
-      const img = new Image();
-      if (!piece.image) {
-        return;
-      }
-      img.src = piece.image;
-      img.onload = () => {
-        ctx.drawImage(img, x, y, 60, 60);
-      };
+
+    initialBoardBlack: () => [
+      [
+        { type: 'rook', color: 'white', image: '/pieces/wr.png' },
+        { type: 'knight', color: 'white', image: '/pieces/wn.png' },
+        { type: 'bishop', color: 'white', image: '/pieces/wb.png' },
+        { type: 'king', color: 'white', image: '/pieces/wk.png' },
+        { type: 'queen', color: 'white', image: '/pieces/wq.png' },
+        { type: 'bishop', color: 'white', image: '/pieces/wb.png' },
+        { type: 'knight', color: 'white', image: '/pieces/wn.png' },
+        { type: 'rook', color: 'white', image: '/pieces/wr.png' },
+      ],
+      [
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' }, 
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
+      ],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null],
+      [
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+        { type: 'pawn', color: 'black', image: '/pieces/bp.png' },
+      ],
+      [
+        { type: 'rook', color: 'black', image: '/pieces/br.png' },
+        { type: 'knight', color: 'black', image: '/pieces/bn.png' },
+        { type: 'bishop', color: 'black', image: '/pieces/bb.png' },
+        { type: 'king', color: 'black', image: '/pieces/bk.png' },
+        { type: 'queen', color: 'black', image: '/pieces/bq.png' },
+        { type: 'bishop', color: 'black', image: '/pieces/bb.png' },
+        { type: 'knight', color: 'black', image: '/pieces/bn.png' },
+        { type: 'rook', color: 'black', image: '/pieces/br.png' },
+      ],
+    ],
+
+    getPieceBackground: (square) => {
+        let typeInitial = square.type ? square.type === "knight" ? 'n' : square.type[0] : square.type[0];
+        let colorInitial = square.color ? square.color[0] : '';
+        return colorInitial + typeInitial;
     },
   
     makeMove: (from, to, board, draggingPiece) => {

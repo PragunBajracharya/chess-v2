@@ -22,3 +22,58 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.wr {
+  background-image: url('/pieces/wr.png');
+}
+
+.br {
+  background-image: url('/pieces/br.png');
+}
+
+.wn {
+  background-image: url('/pieces/wn.png');
+}
+
+.bn {
+  background-image: url('/pieces/bn.png');
+}
+
+.wb {
+  background-image: url('/pieces/wb.png');
+}
+
+.bb {
+  background-image: url('/pieces/bb.png');
+}
+
+.wq {
+  background-image: url('/pieces/wq.png');
+}
+
+.bq {
+  background-image: url('/pieces/bq.png');
+}
+
+.wp {
+  background-image: url('/pieces/wp.png');
+}
+
+.wk {
+  background-image: url('/pieces/wk.png');
+}
+
+.bk {
+  background-image: url('/pieces/bk.png');
+}
+
+.bp {
+  background-image: url('/pieces/bp.png');
+}
+
+.wr, .br, .wn, .bn, .wb, .bb, .wq, .bq, .wp, .wk, .bk, .bp {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: grab;
+}

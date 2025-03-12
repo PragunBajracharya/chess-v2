@@ -1,92 +1,97 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { gameLogic } from "../lib/gameLogic";
-import { DndContext, useDroppable, useDraggable, DragEndEvent, DragStartEvent, DragOverlay } from "@dnd-kit/core";
+import React, {useEffect, useState} from "react";
+import {gameLogic} from "../lib/gameLogic";
+import {pieceList} from "../lib/pieceList";
 
-const ChessBoard = ({ board, handleMovePiece }) => {
-	const canvasRef = useRef(null);
-	const [draggingPiece, setDraggingPiece] = useState(null);
-	const [dragStart, setDragStart] = useState(null);
-	const [turn, setTurn] = useState("white");
+export default function Chessboard({board, turn, handleMovePiece, handleTurnChange}) {
+    const [selectedPiece, setSelectedPiece] = useState(null);
+    const [dragStart, setDragStart] = useState(null);
+    const [draggedPiece, setDraggedPiece] = useState(null);
 
-	useEffect(() => {
-		const canvas = canvasRef.current;
-		const ctx = canvas?.getContext("2d");
+    const handleSquareClick = (e, row, col) => {
+        const classList = e.target.classList;
+        let pieceClass = null;
+        let hasPieceClass = pieceList.some(cls => {
+                if (classList.contains(cls)) {
+                    pieceClass = cls;
+                    return true;
+                }
+                return false;
+            }
+        )
+        if (!hasPieceClass && !draggedPiece) {
+            return;
+        } else if (hasPieceClass && !draggedPiece) {
+            const piece = board[row][col];
+            setDraggedPiece(piece);
+            setDragStart({row, col});
 
-		// Draw the board and pieces
-		gameLogic.drawBoard(ctx, board);
-	}, [board]);
+        } else if (!hasPieceClass && draggedPiece) {
+            if (!validTurnMove()) return;
+            handleMove(row, col);
+        } else if (hasPieceClass && draggedPiece) {
+            if (!validTurnMove()) return;
+            if (pieceClass[0] !== draggedPiece.color[0]) {
+                handleMove(row, col);
+                return;
+            }
+            const piece = board[row][col];
+            setDraggedPiece(piece);
+            setDragStart({row, col});
+        }
+    };
 
-	const { attributes, isDragging, listeners, setNodeRef } = useDraggable({});
+    const handleMove = (row, col) => {
+        const move = gameLogic.makeMove(dragStart, {row, col}, board, draggedPiece);
+        let changedTurn = turn === "white" ? "black" : "white";
+        handleTurnChange(changedTurn);
+        handleMovePiece(move);
+        setDraggedPiece(null);
+        setDragStart(null);
+    }
 
-	const handleMouseDown = (e) => {
-		const canvas = canvasRef.current;
-		const squareSize = 60;
-		const rect = canvas.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		const col = Math.floor(x / squareSize);
-		const row = Math.floor(y / squareSize);
+    const validTurnMove = () => {
+        if (draggedPiece.color !== turn) {
+            console.error(turn, "Turn")
+            setDraggedPiece(null);
+            setDragStart(null);
+            return false;
+        }
+        return true;
+    }
 
-		const piece = board[row][col];
-		if (turn === "white" && piece?.color === "black") return;
-		if (turn === "black" && piece?.color === "white") return;
-		if (piece) {
-			setDraggingPiece(piece);
-			setDragStart({ row, col });
-		}
-	};
+    if (board.length === 0) {
+        return <div>Loading...</div>;
+    }
 
-	const handleMouseMove = (e) => {
-		if (!draggingPiece) return;
+    return (
+        <div className="w-full max-w-md md:max-w-lg lg:max-w-xl">
+            <div className="grid grid-cols-8 border border-gray-800">
+                {board.map((row, rowIndex) =>
+                    row.map((square, colIndex) => {
+                        const isBlackSquare = (rowIndex + colIndex) % 2 === 1;
+                        const isSelected = selectedPiece?.row === rowIndex && selectedPiece?.col === colIndex;
 
-		const canvas = canvasRef.current;
-		const rect = canvas.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
+                        return (
+                            <div
+                                key={`${rowIndex}-${colIndex}`}
+                                className={`
+					aspect-square 
+					${isBlackSquare ? "bg-gray-600" : "bg-gray-200"} 
+					${isSelected ? "ring-2 ring-blue-500 ring-inset" : ""}
+					${square ? gameLogic.getPieceBackground(square) : ""}
+				  `}
+                                onClick={(e) => handleSquareClick(e, rowIndex, colIndex)}
 
-		// Redraw the board with the moved piece
-		const ctx = canvas.getContext("2d");
-		gameLogic.drawBoard(ctx, board);
-		gameLogic.drawPiece(ctx, draggingPiece, x - 30, y - 30); // Draw piece at mouse position
-	};
+                            />
+                        );
+                    })
+                )}
+            </div>
 
-	const handleMouseUp = (e) => {
-		if (!draggingPiece || !dragStart) return;
-
-		const canvas = canvasRef.current;
-		const squareSize = 60;
-		const rect = canvas.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		const col = Math.floor(x / squareSize);
-		const row = Math.floor(y / squareSize);
-
-		const move = gameLogic.makeMove(dragStart, { row, col }, board, draggingPiece);
-		if (move) {
-			handleMovePiece(move);
-		}
-		if (move && move.newBoard) {
-			setTurn(turn === "white" ? "black" : "white");
-		}
-		setDraggingPiece(null);
-		setDragStart(null);
-	};
-
-	return (
-		<DndContext>
-				<canvas
-					ref={canvasRef}
-					width={480}
-					height={480}
-					onMouseDown={handleMouseDown}
-					onMouseMove={handleMouseMove}
-					onMouseUp={handleMouseUp}
-					style={{ border: "1px solid black" }}
-				/>
-		</DndContext>
-	);
-};
-
-export default ChessBoard;
+            <div
+                className="mt-4 text-center text-sm">{selectedPiece ? `Selected: ${board[selectedPiece.row][selectedPiece.col].position}` : "Click on a piece to move it"}</div>
+        </div>
+    );
+}
