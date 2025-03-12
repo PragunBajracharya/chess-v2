@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from "react";
 import {gameLogic} from "../lib/gameLogic";
-import {pieceList} from "../lib/pieceList";
+import {pieceList} from "../lib/helper";
 
 export default function Chessboard({board, turn, handleMovePiece, handleTurnChange}) {
     const [selectedPiece, setSelectedPiece] = useState(null);
@@ -11,55 +11,62 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
 
     const handleSquareClick = (e, row, col) => {
         const classList = e.target.classList;
-        let pieceClass = null;
-        let hasPieceClass = pieceList.some(cls => {
-                if (classList.contains(cls)) {
-                    pieceClass = cls;
-                    return true;
-                }
-                return false;
-            }
-        )
-        if (!hasPieceClass && !draggedPiece) {
+        let pieceClass = pieceList.find(cls => classList.contains(cls)) || null;
+        if (!pieceClass && !draggedPiece) {
             return;
-        } else if (hasPieceClass && !draggedPiece) {
-            const piece = board[row][col];
-            setDraggedPiece(piece);
-            setDragStart({row, col});
+        }
+        if (pieceClass && !draggedPiece) {
+            selectPiece(e, row, col);
+            return;
+        }
+        if (!pieceClass && draggedPiece) {
+            if (validTurnMove(e)) handleMove(row, col);
+            return;
+        }
+        if (pieceClass && draggedPiece) {
+            if (!validTurnMove(e)) return;
 
-        } else if (!hasPieceClass && draggedPiece) {
-            if (!validTurnMove()) return;
-            handleMove(row, col);
-        } else if (hasPieceClass && draggedPiece) {
-            if (!validTurnMove()) return;
             if (pieceClass[0] !== draggedPiece.color[0]) {
                 handleMove(row, col);
                 return;
             }
-            const piece = board[row][col];
-            setDraggedPiece(piece);
-            setDragStart({row, col});
+
+            selectPiece(e, row, col);
         }
+    };
+
+    const selectPiece = (e, row, col) => {
+        if (selectedPiece) selectedPiece.classList.remove("selected");
+
+        e.target.classList.add("selected");
+        setSelectedPiece(e.target);
+        setDraggedPiece(board[row][col]);
+        setDragStart({ row, col });
     };
 
     const handleMove = (row, col) => {
         const move = gameLogic.makeMove(dragStart, {row, col}, board, draggedPiece);
-        let changedTurn = turn === "white" ? "black" : "white";
-        handleTurnChange(changedTurn);
+        handleTurnChange(turn === "white" ? "black" : "white");
         handleMovePiece(move);
-        setDraggedPiece(null);
-        setDragStart(null);
+        resetSelection();
     }
 
-    const validTurnMove = () => {
-        if (draggedPiece.color !== turn) {
-            console.error(turn, "Turn")
-            setDraggedPiece(null);
-            setDragStart(null);
-            return false;
-        }
-        return true;
+    const validTurnMove = (e) => {
+        if (draggedPiece.color === turn) return true;
+
+        selectedPiece.classList.remove("selected");
+        selectedPiece.classList.add("error");
+        setTimeout(() => selectedPiece.classList.remove("error"), 1000);
+
+        resetSelection();
+        return false;
     }
+
+    const resetSelection = () => {
+        setDraggedPiece(null);
+        setDragStart(null);
+        setSelectedPiece(null);
+    };
 
     if (board.length === 0) {
         return <div>Loading...</div>;
@@ -89,9 +96,6 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
                     })
                 )}
             </div>
-
-            <div
-                className="mt-4 text-center text-sm">{selectedPiece ? `Selected: ${board[selectedPiece.row][selectedPiece.col].position}` : "Click on a piece to move it"}</div>
         </div>
     );
 }

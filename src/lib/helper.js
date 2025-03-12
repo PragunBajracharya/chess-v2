@@ -11,4 +11,9 @@ export const pieceList = [
     "wq",
     "bk",
     "wk"
-]
+];
+
+export const getChessNotation = (row, col) => {
+    const files = "abcdefgh";
+    return `${files[col]}${8 - row}`;
+};

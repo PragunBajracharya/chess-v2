@@ -45,6 +45,9 @@ export default function Home() {
         <div>
             <ChessBoard board={board} turn={turn} handleMovePiece={handleMovePiece}
                         handleTurnChange={handleTurnChange}/>
+            <div>
+                Turn: {turn[0].toUpperCase() + turn.substring(1)}
+            </div>
             <MoveHistory moves={moveHistory}/>
             {renderBoardArray()}
         </div>
