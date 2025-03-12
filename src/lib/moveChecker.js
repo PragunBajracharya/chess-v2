@@ -1,5 +1,4 @@
-export const isValidMove = (turn, selectedPieceClass, from, to, pieceClass, board) => {
-    let hasPiece = !!pieceClass;
+export const isValidMove = (turn, selectedPieceClass, from, to, board) => {
     switch (selectedPieceClass) {
         case 'wp':
         case "bp":

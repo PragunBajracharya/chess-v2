@@ -24,7 +24,7 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
         if (!pieceClass && draggedPiece) {
             console.log("2")
             let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
-            if (validTurnMove(e) && isValidMove(turn, selectedPieceClass, dragStart, {row, col}, pieceClass, board)) handleMove(row, col);
+            if (validTurnMove(e) && isValidMove(turn, selectedPieceClass, dragStart, {row, col}, board)) handleMove(row, col);
             showError();
             resetSelection();
             return;
@@ -36,7 +36,7 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
                 return;
             }
             let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
-            if (!validTurnMove(e) || !isValidMove(turn, selectedPieceClass, dragStart, {row, col}, pieceClass, board)) {
+            if (!validTurnMove(e) || !isValidMove(turn, selectedPieceClass, dragStart, {row, col}, board)) {
                 showError();
                 resetSelection();
                 return;
