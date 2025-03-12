@@ -1,5 +1,5 @@
 export const gameLogic = {
-    initialBoardWhite: () => [
+    initialBoard: () => [
       [
         { type: 'rook', color: 'black', image: '/pieces/br.png' },
         { type: 'knight', color: 'black', image: '/pieces/bn.png' },
@@ -58,7 +58,7 @@ export const gameLogic = {
         { type: 'rook', color: 'white', image: '/pieces/wr.png' },
       ],
       [
-        { type: 'pawn', color: 'white', image: '/pieces/wp.png' }, 
+        { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
         { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
         { type: 'pawn', color: 'white', image: '/pieces/wp.png' },
         { type: 'pawn', color: 'white', image: '/pieces/wp.png' },

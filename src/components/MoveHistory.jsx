@@ -8,7 +8,7 @@ const MoveHistory = ({moves}) => {
                 {moves.map((move, index) => (
                     <li key={index} style={{marginBottom: '10px'}}>
                         <strong>Move {index + 1}:</strong>
-                        <p>{`${move.piece} moved from ${move.piece !== "pawn" ? move.piece[0].toUpperCase() : ""}${getChessNotation(move.from.row, move.from.col)} → ${getChessNotation(move.to.row, move.to.col)}`}</p>
+                        <p>{`${move.piece} moved from ${move.piece !== "pawn" ? move.piece === "knight" ? "N": move.piece[0].toUpperCase() : ""}${getChessNotation(move.from.row, move.from.col)} → ${getChessNotation(move.to.row, move.to.col)}`}</p>
             </li>
           ))}
         </ul>

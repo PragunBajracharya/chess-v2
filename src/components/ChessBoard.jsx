@@ -3,6 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {gameLogic} from "../lib/gameLogic";
 import {pieceList} from "../lib/helper";
+import {isValidMove} from "../lib/moveChecker";
 
 export default function Chessboard({board, turn, handleMovePiece, handleTurnChange}) {
     const [selectedPiece, setSelectedPiece] = useState(null);
@@ -16,22 +17,33 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
             return;
         }
         if (pieceClass && !draggedPiece) {
+            console.log("1")
             selectPiece(e, row, col);
             return;
         }
         if (!pieceClass && draggedPiece) {
-            if (validTurnMove(e)) handleMove(row, col);
+            console.log("2")
+            let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
+            if (validTurnMove(e) && isValidMove(turn, selectedPieceClass, dragStart, {row, col}, pieceClass, board)) handleMove(row, col);
+            showError();
+            resetSelection();
             return;
         }
         if (pieceClass && draggedPiece) {
-            if (!validTurnMove(e)) return;
-
-            if (pieceClass[0] !== draggedPiece.color[0]) {
-                handleMove(row, col);
+            console.log("3")
+            if (pieceClass[0] === draggedPiece.color[0]) {
+                selectPiece(e, row, col);
                 return;
             }
-
-            selectPiece(e, row, col);
+            let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
+            if (!validTurnMove(e) || !isValidMove(turn, selectedPieceClass, dragStart, {row, col}, pieceClass, board)) {
+                showError();
+                resetSelection();
+                return;
+            }
+            if (pieceClass[0] !== draggedPiece.color[0]) {
+                handleMove(row, col);
+            }
         }
     };
 
@@ -55,18 +67,22 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
         if (draggedPiece.color === turn) return true;
 
         selectedPiece.classList.remove("selected");
-        selectedPiece.classList.add("error");
-        setTimeout(() => selectedPiece.classList.remove("error"), 1000);
-
+        showError();
         resetSelection();
         return false;
     }
 
     const resetSelection = () => {
+        selectedPiece.classList.remove("selected");
         setDraggedPiece(null);
         setDragStart(null);
         setSelectedPiece(null);
     };
+
+    const showError = () => {
+        selectedPiece.classList.add("error");
+        setTimeout(() => selectedPiece.classList.remove("error"), 1000);
+    }
 
     if (board.length === 0) {
         return <div>Loading...</div>;
