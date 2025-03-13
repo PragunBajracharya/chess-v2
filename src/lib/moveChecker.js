@@ -1,11 +1,17 @@
 export const isValidMove = (turn, selectedPieceClass, from, to, board) => {
     switch (selectedPieceClass) {
-        case 'wp':
+        case "wp":
         case "bp":
             return isValidPawnMove(turn, from, to, board);
-        case 'wr':
+        case "wr":
         case "br":
-            return isValidRooKMove(turn, from, to, board);
+            return isValidRookMove(from, to, board);
+        case "wb":
+        case "bb":
+            return isValidBishopMove(from, to, board);
+        case "wq":
+        case "bq":
+            return isValidQueenMove(from, to, board);
     }
 }
 
@@ -36,7 +42,7 @@ export const isValidPawnMove = (turn, from, to, board) => {
     return false;
 }
 
-export const isValidRooKMove = (turn, from, to, board) => {
+export const isValidRookMove = (from, to, board) => {
     if (from.row !== to.row && from.col !== to.col) {
         return false;
     }
@@ -58,4 +64,40 @@ export const isValidRooKMove = (turn, from, to, board) => {
     }
 
     return true;
+}
+
+export const isValidBishopMove = (from, to, board) => {
+    if (Math.abs(to.row - from.row) !== Math.abs(to.col - from.col)) {
+        return false;
+    }
+
+    // Determine the direction of movement
+    let rowDirection = to.row > from.row ? 1 : -1;
+    let colDirection = to.col > from.col ? 1 : -1;
+
+    // Check if there are any pieces in the way
+    let currentRow = from.row + rowDirection;
+    let currentCol = from.col + colDirection;
+
+    while (currentRow !== to.row || currentCol !== to.col) {
+        if (board[currentRow][currentCol] !== null) {
+            return false; // A piece is blocking the way
+        }
+        currentRow += rowDirection;
+        currentCol += colDirection;
+    }
+
+    return true;
+}
+
+export const isValidQueenMove = (from, to, board) => {
+    if (from.row === to.row || from.col === to.col) {
+        return isValidRookMove(from, to, board);
+    }
+
+    if (Math.abs(to.row - from.row) === Math.abs(to.col - from.col)) {
+        return isValidBishopMove(from, to, board);
+    }
+
+    return false;
 }
