@@ -1,4 +1,4 @@
-export const pieceList = [
+export const pieceClassList = [
     "wp",
     "br",
     "wr",

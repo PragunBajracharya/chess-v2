@@ -2,8 +2,8 @@
 
 import React, {useEffect, useState} from "react";
 import {gameLogic} from "../lib/gameLogic";
-import {pieceList} from "../lib/helper";
-import {isValidMove} from "../lib/moveChecker";
+import {pieceClassList} from "../lib/helper";
+import {isValidMoveWithCheck, performCastling, updateCastlingRights, isValidKingMove} from "../lib/moveChecker";
 
 export default function Chessboard({board, turn, handleMovePiece, handleTurnChange}) {
     const [selectedPiece, setSelectedPiece] = useState(null);
@@ -12,31 +12,26 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
 
     const handleSquareClick = (e, row, col) => {
         const classList = e.target.classList;
-        let pieceClass = pieceList.find(cls => classList.contains(cls)) || null;
+        let pieceClass = pieceClassList.find(cls => classList.contains(cls)) || null;
         if (!pieceClass && !draggedPiece) {
             return;
         }
         if (pieceClass && !draggedPiece) {
-            console.log("1")
             selectPiece(e, row, col);
             return;
         }
         if (!pieceClass && draggedPiece) {
-            console.log("2")
-            let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
-            if (validTurnMove(e) && isValidMove(turn, selectedPieceClass, dragStart, {row, col}, board)) handleMove(row, col);
+            if (validTurnMove(e) && isValidMoveWithCheck(turn, draggedPiece, dragStart, {row, col}, board)) handleMove(row, col);
             showError();
             resetSelection();
             return;
         }
         if (pieceClass && draggedPiece) {
-            console.log("3")
             if (pieceClass[0] === draggedPiece.color[0]) {
                 selectPiece(e, row, col);
                 return;
             }
-            let selectedPieceClass = pieceList.find(cls => selectedPiece.classList.contains(cls));
-            if (!validTurnMove(e) || !isValidMove(turn, selectedPieceClass, dragStart, {row, col}, board)) {
+            if (!validTurnMove(e) || !isValidMoveWithCheck(turn, draggedPiece, dragStart, {row, col}, board)) {
                 showError();
                 resetSelection();
                 return;
@@ -57,7 +52,21 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
     };
 
     const handleMove = (row, col) => {
-        const move = gameLogic.makeMove(dragStart, {row, col}, board, draggedPiece);
+        let move= {}
+        if (draggedPiece.type === "king" && isValidKingMove(dragStart, {row, col}, board)) {
+            if (Math.abs(col - dragStart.col) === 2) {
+                performCastling(board, dragStart, {row, col});
+            }
+            updateCastlingRights(dragStart, board)
+            board[row][col] = draggedPiece;
+            board[dragStart.row][dragStart.col] = null;
+            move = {newBoard: board,
+                piece: draggedPiece.type,
+                from: dragStart,
+                to: {row, col} }
+        } else {
+            move = gameLogic.makeMove(dragStart, {row, col}, board, draggedPiece);
+        }
         handleTurnChange(turn === "white" ? "black" : "white");
         handleMovePiece(move);
         resetSelection();
