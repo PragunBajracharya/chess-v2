@@ -11,6 +11,7 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
     const [draggedPiece, setDraggedPiece] = useState(null);
 
     const handleSquareClick = (e, row, col) => {
+        e.preventDefault()
         const classList = e.target.classList;
         let pieceClass = pieceClassList.find(cls => classList.contains(cls)) || null;
         if (!pieceClass && !draggedPiece) {
@@ -41,6 +42,11 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
             }
         }
     };
+
+    const handleRightClick = (e) => {
+        e.preventDefault();
+        if (selectedPiece) resetSelection();
+    }
 
     const selectPiece = (e, row, col) => {
         if (selectedPiece) selectedPiece.classList.remove("selected");
@@ -115,7 +121,7 @@ export default function Chessboard({board, turn, handleMovePiece, handleTurnChan
 					${square ? gameLogic.getPieceBackground(square) : ""}
 				  `}
                                 onClick={(e) => handleSquareClick(e, rowIndex, colIndex)}
-
+                                onContextMenu={e => handleRightClick(e)}
                             />
                         );
                     })
